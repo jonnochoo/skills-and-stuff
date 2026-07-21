@@ -11,7 +11,7 @@ directly on a fresh machine without cloning the repo first.
 On a new Windows machine, open PowerShell and run:
 
 ```powershell
-irm https://raw.githubusercontent.com/jonnochoo/skills-and-stuff/main/setup/apps/install-apps.ps1 | iex
+irm https://raw.githubusercontent.com/jonnochoo/skills-and-stuff/master/setup/apps/install-apps.ps1 | iex
 ```
 
 Or, if you already have the repo checked out:
