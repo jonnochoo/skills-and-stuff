@@ -4,7 +4,7 @@ Text-expander config for [espanso](https://espanso.org/) — turns short trigger
 
 ## Setup on a new machine
 
-Espanso itself is installed by [setup/apps](../apps/README.md). Once it's installed, sync the
+Espanso itself is installed by [setup](../README.md). Once it's installed, sync the
 match file:
 
 ```powershell
