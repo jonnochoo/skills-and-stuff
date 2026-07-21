@@ -35,7 +35,8 @@ $apps = @(
     "Docker.DockerDesktop",
     "Foxit.FoxitReader",
     "sharkdp.bat",
-    "junegunn.fzf"
+    "junegunn.fzf",
+    "Clement-Gruin.Bottom"
 )
 
 foreach ($id in $apps) {
