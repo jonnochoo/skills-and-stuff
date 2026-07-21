@@ -13,19 +13,31 @@ btm
 
 ## Common keyboard shortcuts
 
-| Key                | Action                                  |
-| ------------------- | ---------------------------------------- |
-| `q` / `Ctrl+c`      | Quit                                     |
-| `?`                 | Show help / keybinds                     |
-| `Tab`               | Cycle between widgets                    |
-| Arrow keys / `hjkl` | Navigate within a widget                 |
-| `dd`                | Kill the selected process                |
-| `/`                 | Search/filter processes                  |
-| `Ctrl+f`            | Search by full command instead of name   |
-| `%`                 | Toggle percentage vs. absolute values    |
-| `Esc`               | Close search/expanded widget             |
-| `e`                 | Expand the currently selected widget     |
-| `+` / `-`           | Zoom in/out on a graph's time range      |
-| `f`                 | Freeze/unfreeze the display              |
-| `t`                 | Toggle tree mode in the process widget   |
-| `p` / `c` / `n`     | Sort processes by PID / CPU / name       |
+### Process management
+
+| Key        | Action                                  |
+| ---------- | ---------------------------------------- |
+| `dd`       | Kill the selected process                |
+| `/`        | Search/filter processes by name          |
+| `Ctrl+f`   | Also opens search                        |
+| `f`        | Freeze/unfreeze the current data (pause updates) |
+
+### Sorting (in the process widget)
+
+| Key                  | Action                          |
+| --------------------- | -------------------------------- |
+| `c`                   | Sort by CPU usage                |
+| `m`                   | Sort by memory usage             |
+| `p`                   | Sort by PID                      |
+| `n`                   | Sort by process name             |
+| `,` / `.` or clicking column headers | Cycle sort columns |
+
+### Display
+
+| Key             | Action                                       |
+| ---------------- | --------------------------------------------- |
+| `+` / `-` or scroll wheel | Zoom in/out on graphs (time range) |
+| `t`              | Toggle tree mode (show process hierarchy)     |
+| `e`              | Expand/collapse a widget to fullscreen        |
+| `?`              | Open the help menu showing all keybindings    |
+| `q` or `Ctrl+c`  | Quit                                          |
