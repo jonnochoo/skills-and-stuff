@@ -1,0 +1,5 @@
+matches:
+  - trigger: ":world"
+    replace: "🌍"
+  - trigger: ":shopping"
+    replace: "🛒"
