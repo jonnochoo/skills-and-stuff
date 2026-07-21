@@ -23,7 +23,13 @@ $apps = @(
     "GitHub.cli",
     "OpenJS.NodeJS.LTS",
     "ajeetdsouza.zoxide",
-    "Espanso.Espanso"
+    "Espanso.Espanso",
+    "Tailscale.Tailscale",
+    "Microsoft.WSL",
+    "Canonical.Ubuntu.2404",
+    "Gyan.FFmpeg",
+    "Docker.DockerDesktop",
+    "Foxit.FoxitReader"
 )
 
 foreach ($id in $apps) {
