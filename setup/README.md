@@ -49,7 +49,7 @@ Safe to re-run — winget skips packages that are already installed, and the scr
 - Foxit.FoxitReader
 - sharkdp.bat
 - junegunn.fzf
-- Clement-Gruin.Bottom
+- Clement.bottom
 - posh-git (PowerShell module, not winget)
 
 Plus five shell tweaks the script wires into `$PROFILE`:

@@ -36,7 +36,7 @@ $apps = @(
     "Foxit.FoxitReader",
     "sharkdp.bat",
     "junegunn.fzf",
-    "Clement-Gruin.Bottom"
+    "Clement.bottom"
 )
 
 foreach ($id in $apps) {
