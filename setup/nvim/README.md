@@ -13,6 +13,20 @@ Remove-Item -Recurse -Force $env:LOCALAPPDATA\nvim\.git
 (Removing `.git` is [LazyVim's documented step](https://www.lazyvim.org/installation) so the
 starter becomes your own config instead of a clone of their repo.)
 
+## Requirements
+
+LazyVim's Telescope pickers shell out to these tools, so they need to be on `PATH`:
+
+```powershell
+winget install BurntSushi.ripgrep.MSVC
+winget install sharkdp.fd
+```
+
+| Tool           | Searches by    | Telescope keymap | Analogous to |
+| -------------- | -------------- | ----------------- | ------------ |
+| fd             | filename       | `<space>ff`        | `find`       |
+| ripgrep (`rg`) | file contents  | `<space>/`         | `grep`       |
+
 ## Customizations
 
 Set the treesitter installer to use `zig` instead of a C compiler — add this file:

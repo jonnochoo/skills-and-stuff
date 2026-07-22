@@ -37,7 +37,9 @@ $apps = @(
     "sharkdp.bat",
     "junegunn.fzf",
     "Clement.bottom",
-    "eza-community.eza"
+    "eza-community.eza",
+    "BurntSushi.ripgrep.MSVC",
+    "sharkdp.fd"
 )
 
 foreach ($id in $apps) {
