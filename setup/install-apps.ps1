@@ -36,7 +36,8 @@ $apps = @(
     "Foxit.FoxitReader",
     "sharkdp.bat",
     "junegunn.fzf",
-    "Clement.bottom"
+    "Clement.bottom",
+    "eza-community.eza"
 )
 
 foreach ($id in $apps) {
@@ -99,3 +100,13 @@ $touchFunction = @'
 function touch { param($file) if (!(Test-Path $file)) { New-Item $file } else { (Get-Item $file).LastWriteTime = Get-Date } }
 '@
 Add-ToProfileOnce -Description "touch function" -Pattern "^function touch " -Content $touchFunction
+
+Add-ToProfileOnce -Description "remove built-in ls alias" -Pattern "^Remove-Item Alias:ls" -Content "Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue"
+
+$ezaFunctions = @'
+function ls  { eza --icons --group-directories-first @args }
+function ll  { eza -l --icons --git --group-directories-first @args }
+function la  { eza -la --icons --git --group-directories-first @args }
+function lt  { eza -T -L 2 --icons @args }
+'@
+Add-ToProfileOnce -Description "eza ls/ll/la/lt functions" -Pattern "^function ls " -Content $ezaFunctions
