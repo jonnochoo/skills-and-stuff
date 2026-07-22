@@ -50,9 +50,10 @@ Safe to re-run — winget skips packages that are already installed, and the scr
 - sharkdp.bat
 - junegunn.fzf
 - Clement.bottom
+- eza-community.eza
 - posh-git (PowerShell module, not winget)
 
-Plus five shell tweaks the script wires into `$PROFILE`:
+Plus six shell tweaks the script wires into `$PROFILE`:
 
 - **`cat` is replaced by `bat`** — `Set-Alias -Name cat -Value bat -Option AllScope -Force` is
   appended to your profile, so `cat` gets bat's syntax highlighting and paging instead of the
@@ -67,6 +68,9 @@ Plus five shell tweaks the script wires into `$PROFILE`:
   its `LastWriteTime` to now, matching Unix `touch`.
 - **`history` is added as an alias for `Get-History`** — `Set-Alias -Name history -Value Get-History`
   is appended to your profile, giving you the familiar Unix `history` to list past commands.
+- **`ls`/`ll`/`la`/`lt` are added as functions backed by `eza`** — `ls` (icons, directories
+  first), `ll` (long listing with git status), `la` (long listing including hidden files), and
+  `lt` (2-level tree view).
 
 ## Editing the app list
 
