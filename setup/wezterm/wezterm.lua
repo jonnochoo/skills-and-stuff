@@ -97,7 +97,7 @@ config.win32_system_backdrop = "Acrylic" -- "Mica" and "Tabbed" also work on Win
 -- stays readable. Bump the wash `opacity` up to darken, down to show more image.
 config.background = {
   {
-    source = { File = "C:/Users/jonno/OneDrive/Pictures/Wallpaper/1-osaka-jade-bg.jpg" },
+    source = { File = "C:/Users/jonno/OneDrive/Pictures/Wallpaper/terminal.png" },
     hsb = { brightness = 0.5, saturation = 1.0, hue = 1.0 },
     horizontal_align = "Center",
     vertical_align = "Middle",
@@ -124,7 +124,7 @@ config.initial_rows = 32
 config.adjust_window_size_when_changing_font_size = false
 
 -- Dim panes that don't have focus
-config.inactive_pane_hsb = { saturation = 0.85, brightness = 0.65 }
+config.inactive_pane_hsb = { saturation = 0.85, brightness = 0.1 }
 
 config.default_cursor_style = "BlinkingBar"
 config.cursor_blink_rate = 600
@@ -307,7 +307,7 @@ config.keys = {
   -- Panes
   { key = "\\", mods = "LEADER", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
   { key = "-", mods = "LEADER", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-  { key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = true }) },
+  { key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = false }) },
   { key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
   { key = "o", mods = "LEADER", action = act.RotatePanes("Clockwise") },
   { key = "p", mods = "LEADER", action = act.PaneSelect({ alphabet = "asdfjkl;" }) },
