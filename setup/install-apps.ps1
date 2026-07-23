@@ -115,6 +115,13 @@ function touch { param($file) if (!(Test-Path $file)) { New-Item $file } else { 
 '@
 Add-ToProfileOnce -Description "touch function" -Pattern "^function touch " -Content $touchFunction
 
+$uptimeFunction = @'
+function uptime {
+    (Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
+}
+'@
+Add-ToProfileOnce -Description "uptime function" -Pattern "^function uptime " -Content $uptimeFunction
+
 Add-ToProfileOnce -Description "remove built-in ls alias" -Pattern "^Remove-Item Alias:ls" -Content "Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue"
 
 $ezaFunctions = @'
