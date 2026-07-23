@@ -12,6 +12,7 @@
 # ---------------------------------------------------------------------------
 
 $apps = @(
+    "Microsoft.PowerShell",
     "Git.Git",
     "Notepad++.Notepad++",
     "Microsoft.VisualStudioCode",
@@ -105,6 +106,9 @@ Add-ToProfileOnce -Description "which -> Get-Command alias" -Pattern ([regex]::E
 
 $historyAlias = "Set-Alias -Name history -Value Get-History"
 Add-ToProfileOnce -Description "history -> Get-History alias" -Pattern ([regex]::Escape($historyAlias)) -Content $historyAlias
+
+$rebootAlias = "Set-Alias -Name reboot -Value Restart-Computer"
+Add-ToProfileOnce -Description "reboot -> Restart-Computer alias" -Pattern ([regex]::Escape($rebootAlias)) -Content $rebootAlias
 
 $touchFunction = @'
 function touch { param($file) if (!(Test-Path $file)) { New-Item $file } else { (Get-Item $file).LastWriteTime = Get-Date } }
