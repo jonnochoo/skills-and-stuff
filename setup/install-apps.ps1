@@ -39,13 +39,21 @@ $apps = @(
     "Clement.bottom",
     "eza-community.eza",
     "BurntSushi.ripgrep.MSVC",
-    "sharkdp.fd"
+    "sharkdp.fd",
+    "YS-L.csvlens"
 )
 
 foreach ($id in $apps) {
     Write-Host "Installing $id..."
     winget install --id $id -e --silent --accept-package-agreements --accept-source-agreements
 }
+
+# ---------------------------------------------------------------------------
+# Install GitHub CLI Extensions
+# ---------------------------------------------------------------------------
+
+Write-Host "Installing gh-dash GitHub CLI extension..."
+gh extension install dlvhdr/gh-dash
 
 # ---------------------------------------------------------------------------
 # Install PowerShell Modules

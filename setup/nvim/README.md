@@ -15,17 +15,17 @@ starter becomes your own config instead of a clone of their repo.)
 
 ## Requirements
 
-LazyVim's Telescope pickers shell out to these tools, so they need to be on `PATH`:
+LazyVim's Snacks picker shells out to these tools, so they need to be on `PATH`:
 
 ```powershell
 winget install BurntSushi.ripgrep.MSVC
 winget install sharkdp.fd
 ```
 
-| Tool           | Searches by    | Telescope keymap | Analogous to |
-| -------------- | -------------- | ----------------- | ------------ |
-| fd             | filename       | `<space>ff`        | `find`       |
-| ripgrep (`rg`) | file contents  | `<space>/`         | `grep`       |
+| Tool           | Searches by    | LazyVim keymap | Analogous to |
+| -------------- | -------------- | --------------- | ------------ |
+| fd             | filename       | `<space>ff`      | `find`       |
+| ripgrep (`rg`) | file contents  | `<space>/`       | `grep`       |
 
 ## Customizations
 

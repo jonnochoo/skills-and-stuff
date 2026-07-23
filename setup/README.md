@@ -51,6 +51,7 @@ Safe to re-run — winget skips packages that are already installed, and the scr
 - junegunn.fzf
 - Clement.bottom
 - eza-community.eza
+- YS-L.csvlens
 - posh-git (PowerShell module, not winget)
 
 Plus six shell tweaks the script wires into `$PROFILE`:

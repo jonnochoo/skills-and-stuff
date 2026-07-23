@@ -29,6 +29,20 @@ end
 local PWSH = "C:/Program Files/PowerShell/7/pwsh.exe"
 local GIT_BASH = "C:/Program Files/Git/bin/bash.exe"
 
+-- Project workspaces: LEADER f opens a fuzzy picker over this list. Selecting an
+-- entry creates (if needed) a workspace named `id`, cwd'd into `path`, with tabs
+-- for lazygit / claude / nvim — or just switches to it if already open.
+local projects = {
+  { id = "skills", label = "skills (dotfiles)", path = "C:/Users/jonno/Dev/skills" },
+}
+
+-- Spawn through a real shell: `claude` on Windows is usually a .cmd/.ps1 npm shim,
+-- not a directly-executable .exe, so bare args = {"claude"} can fail silently.
+-- -NoExit also keeps the pane alive if the command exits or crashes.
+local function shell_cmd(command)
+  return { PWSH, "-NoLogo", "-NoExit", "-Command", command }
+end
+
 -- Prefer PowerShell 7 if installed, else fall back to Windows PowerShell 5.1
 if exists(PWSH) then
   config.default_prog = { PWSH, "-NoLogo" }
@@ -206,6 +220,7 @@ local icons = {
   bash = wezterm.nerdfonts.cod_terminal_bash,
   git = wezterm.nerdfonts.dev_git,
   lazygit = wezterm.nerdfonts.dev_git,
+  claude = wezterm.nerdfonts.md_robot,
   node = wezterm.nerdfonts.dev_nodejs_small,
   python = wezterm.nerdfonts.dev_python,
   docker = wezterm.nerdfonts.linux_docker,
@@ -294,6 +309,55 @@ wezterm.on("gui-startup", function(cmd)
 end)
 
 -- ---------------------------------------------------------------------------
+-- Project workspaces: LEADER f -> fuzzy-pick a project from the `projects`
+-- table above. First pick creates a workspace with lazygit/claude/nvim tabs
+-- cwd'd into the project path; later picks just switch to it.
+-- ---------------------------------------------------------------------------
+
+local function workspace_exists(name)
+  for _, ws in ipairs(mux.get_workspace_names()) do
+    if ws == name then
+      return true
+    end
+  end
+  return false
+end
+
+local function open_project(window, pane, proj)
+  if not workspace_exists(proj.id) then
+    -- First tab (lazygit) via spawn_window so we get the mux window handle back;
+    -- spawn_tab for the rest. Spawning nvim last leaves it as the active tab.
+  end
+  window:perform_action(act.SwitchToWorkspace({ name = proj.id }), pane)
+end
+
+wezterm.on("open-project-picker", function(window, pane)
+  local choices = {}
+  for _, p in ipairs(projects) do
+    table.insert(choices, { id = p.id, label = p.label })
+  end
+  window:perform_action(
+    act.InputSelector({
+      title = "Open Project",
+      choices = choices,
+      fuzzy = true,
+      action = wezterm.action_callback(function(win, pn, id)
+        if not id then
+          return
+        end
+        for _, p in ipairs(projects) do
+          if p.id == id then
+            open_project(win, pn, p)
+            break
+          end
+        end
+      end),
+    }),
+    pane
+  )
+end)
+
+-- ---------------------------------------------------------------------------
 -- Keys
 -- ---------------------------------------------------------------------------
 
@@ -337,6 +401,7 @@ config.keys = {
   { key = "l", mods = "CTRL|SHIFT", action = act.ShowLauncher },
 
   -- Workspaces
+  { key = "f", mods = "LEADER", action = act.EmitEvent("open-project-picker") },
   { key = "s", mods = "LEADER", action = act.ShowLauncherArgs({ flags = "FUZZY|WORKSPACES" }) },
   { key = "W", mods = "LEADER|SHIFT", action = act.PromptInputLine({
       description = "New workspace name:",
