@@ -41,7 +41,8 @@ $apps = @(
     "eza-community.eza",
     "BurntSushi.ripgrep.MSVC",
     "sharkdp.fd",
-    "YS-L.csvlens"
+    "YS-L.csvlens",
+    "JanDeDobbeleer.OhMyPosh"
 )
 
 foreach ($id in $apps) {
@@ -95,6 +96,9 @@ if (-not (Test-Path $PROFILE)) {
 # instead of only exposing the default `z` / `zi` commands.
 $zoxideInit = 'Invoke-Expression (& { (zoxide init powershell --cmd cd | Out-String) })'
 Add-ToProfileOnce -Description "zoxide" -Pattern ([regex]::Escape($zoxideInit)) -Content $zoxideInit
+
+$ohMyPoshInit = 'oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\jandedobbeleer.omp.json" | Invoke-Expression'
+Add-ToProfileOnce -Description "oh-my-posh" -Pattern "^oh-my-posh init pwsh" -Content $ohMyPoshInit
 
 # -Force is required: `cat` is already a built-in AllScope alias for Get-Content, and
 # Set-Alias won't override an existing alias of the same name without it.
