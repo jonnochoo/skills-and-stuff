@@ -3,6 +3,7 @@
 [alias]
   co = checkout
   cob = checkout -b
+  gp = pull
   ec = config --global -e
   lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
   amend = commit -a --amend
