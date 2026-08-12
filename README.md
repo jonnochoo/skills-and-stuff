@@ -30,10 +30,32 @@ _(WIP — notes to self go here.)_
 
 ## AI skills
 
-Claude Code skills, one directory per skill with a `SKILL.md`. Copy the ones you want into
-`~/.claude/skills/` (or a project's `.claude/skills/`) and Claude picks them up automatically.
+Claude Code skills live under [skills/](skills/), one directory per skill with a `SKILL.md`.
 
-- [create-pull-request](create-pull-request/SKILL.md) — drafts terse, structured PR
+- [skills/create-pull-request](skills/create-pull-request/SKILL.md) — drafts terse, structured PR
   titles/descriptions (conventional-commit title, fixed sections, stacking support).
-- [brain-dump-to-issues](brain-dump-to-issues/SKILL.md) — turns a freeform paste of todos into
-  tagged, grouped GitHub issues.
+- [skills/brain-dump-to-issues](skills/brain-dump-to-issues/SKILL.md) — turns a freeform paste of
+  todos into tagged, grouped GitHub issues.
+
+### Installing a skill
+
+Use the [Skills CLI](https://skills.sh/) (`npx skills`), the package manager for the open agent
+skills ecosystem:
+
+```powershell
+# install one skill, project-local
+npx skills add jonnochoo/skills-and-stuff --skill create-pull-request
+
+# install one skill, global (all projects)
+npx skills add jonnochoo/skills-and-stuff --skill create-pull-request -g
+
+# install everything in this repo
+npx skills add jonnochoo/skills-and-stuff --all
+
+# see what's available first
+npx skills add jonnochoo/skills-and-stuff -l
+```
+
+By default it symlinks the skill into `~/.claude/skills/` (or the project's `.claude/skills/`) so
+it tracks this repo; pass `--copy` to copy the files instead. Run `npx skills update` later to
+pull in changes.
