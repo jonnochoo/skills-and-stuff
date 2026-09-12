@@ -65,7 +65,7 @@ Why this change exists. 1-3 sentences.
 
 ## What Changed
 
-Bullet list. Concrete, no fluff. Group by area if the diff is large.
+Table, not a bullet list — plain English, for a reviewer who isn't in the code. Two columns: `Change` (the concrete technical change — endpoint, flag, function) and `What it means` (what actually happens as a result, in plain language, no jargon). One row per distinct change; group related changes into one row if they share the same effect. If the diff is large, a `### <area>` sub-heading per group is fine, each with its own table.
 
 ## Risks
 
