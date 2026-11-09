@@ -55,6 +55,8 @@ const HELP = [
   ["r", "rebase current onto selected"],
   ["R", "rename"],
   ["u", "set upstream to origin/<name>"],
+  ["⇡ ⇣", "vs its remote branch: ⇡ commits to push, ⇣ to pull, ✓ in sync"],
+  ["↑ ↓", "vs main/master: commits ahead (green) / behind (red)"],
   ["o", "open the PR on GitHub (or start one)"],
   ["y", "copy branch name"],
   ["esc", "leave the panel"],
@@ -103,7 +105,8 @@ export default class Branches extends View {
           if (remote) { if (seen.has(name.replace(/^[^/]+\//, ""))) continue; }
           else seen.add(name);
           const [ahead, behind] = (divergence ?? "").split(" ").map(Number);
-          list.push({ current: head === "*", name, remote, ts: Number(ts), subject, track, upstream, base: name === base, ahead: ahead || 0, behind: behind || 0, stat: null });
+          const rAhead = Number(/ahead (\d+)/.exec(track)?.[1] ?? 0), rBehind = Number(/behind (\d+)/.exec(track)?.[1] ?? 0);
+          list.push({ current: head === "*", name, remote, ts: Number(ts), subject, track, upstream, rAhead, rBehind, base: name === base, ahead: ahead || 0, behind: behind || 0, stat: null });
         }
         // Lines and files changed since the branch left main, for the ones that have commits of their own.
         await Promise.all(list.filter((b) => base && !b.base && b.ahead > 0).slice(0, 25).map(async (b) => {
@@ -306,7 +309,13 @@ export default class Branches extends View {
                   return e.child(div().px(4).rounded(3).border_1().border_color(c).text_size(10).text_color(c).child(`PR #${b.pr.number}`));
                 })
                 .when(b.base, (e) => e.child(div().px(4).rounded(3).border_1().border_color(t.border).text_size(10).text_color(t.dim).child("base")))
-                .when(Boolean(b.track), (e) => e.child(div().text_size(10).text_color(t.blocked).child(b.track.replace(/[\[\]]/g, ""))))
+                // Against its own remote branch (what pull/push act on): ⇡ to push, ⇣ to pull, ✓ in sync, or why there is none.
+                .when(!b.remote, (e) => {
+                  const gone = b.track === "[gone]", diverged = b.rAhead > 0 || b.rBehind > 0;
+                  const text = !b.upstream ? "local only" : gone ? "remote gone" : diverged ? [b.rAhead ? `⇡${b.rAhead}` : "", b.rBehind ? `⇣${b.rBehind}` : ""].filter(Boolean).join(" ") : "✓ remote";
+                  const color = gone ? t.ansi1 : diverged ? t.blocked : t.dim;
+                  return e.child(div().px(4).rounded(3).border_1().border_color(color).text_size(10).text_color(color).child(text));
+                })
                 // Against main: commits ahead (green) and behind (red), then a bar of added vs removed lines.
                 .when(b.ahead > 0, (e) => e.child(div().text_size(10).text_color(t.ansi2).child(`↑${b.ahead}`)))
                 .when(b.behind > 0, (e) => e.child(div().text_size(10).text_color(t.ansi1).child(`↓${b.behind}`)))
