@@ -1,6 +1,6 @@
 import { View, div } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { spaces, panes, focused, exec, run, nextCommand, setShared, theme } from "herdr";
+import { spaces, panes, focused, exec, run, nextCommand, setShared, theme, window } from "herdr";
 
 // Keys (panel focused): j/k or down/up move · enter open the PR in the browser · r refresh · esc leave.
 
@@ -37,9 +37,22 @@ function helpCard(t, title, rows) {
       .child(div().flex_1().min_w(0).text_color(t.foreground).child(d))));
 }
 const isHelpKey = (e) => e.key === "?" || (e.key === "/" && e.modifiers.shift);
+// Cross-platform clipboard: pbcopy on macOS, PowerShell on Windows, wl-copy/xclip on Linux.
+async function copyText(text) {
+  const q = "'" + text.replace(/'/g, "'\\''") + "'";
+  const p = window().platform;
+  if (p === "windows") return exec("powershell", ["-NoProfile", "-Command", `Set-Clipboard -Value '${text.replace(/'/g, "''")}'`]);
+  if (p === "macos") return exec("sh", ["-c", `printf %s ${q} | pbcopy`]);
+  return exec("sh", ["-c", `printf %s ${q} | (wl-copy || xclip -selection clipboard)`]);
+}
+
 const HELP = [
   ["j / k", "move down / up (also arrows)"],
-  ["enter", "open the PR in the browser"],
+  ["g / G", "jump to top / bottom"],
+  ["enter / o", "open the PR in the browser"],
+  ["c", "check out the PR's branch (gh pr checkout)"],
+  ["y", "copy the PR's URL"],
+  ["n", "open a new PR for the checked-out branch"],
   ["r", "refresh the list"],
   ["esc", "leave the panel"],
   ["?", "this help"],
@@ -62,15 +75,22 @@ export default class Prs extends View {
     if (this.help) { cx.stop_propagation(); this.help = false; cx.notify(); return; }
     if (e.modifiers.control || e.modifiers.alt || e.modifiers.platform) return;
     if (isHelpKey(e)) { cx.stop_propagation(); this.help = true; cx.notify(); return; }
-    const known = ["j", "k", "down", "up", "enter", "r", "escape"];
-    if (!known.includes(e.key)) return;
+    const k = e.modifiers.shift && e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    const known = ["j", "k", "g", "G", "down", "up", "home", "end", "enter", "o", "c", "y", "n", "r", "escape"];
+    if (!known.includes(k)) return;
     cx.stop_propagation();
-    switch (e.key) {
+    const pr = this.prs[this.sel];
+    switch (k) {
       case "j": case "down": this.sel = Math.min(this.prs.length - 1, this.sel + 1); break;
       case "k": case "up": this.sel = Math.max(0, this.sel - 1); break;
-      case "enter": if (this.prs[this.sel]) this.open(this.prs[this.sel], cx); break;
+      case "g": case "home": this.sel = 0; break;
+      case "G": case "end": this.sel = Math.max(0, this.prs.length - 1); break;
+      case "enter": case "o": if (pr) this.open(pr, cx); break;
+      case "c": if (pr) this.checkout(pr, cx); break;
+      case "y": if (pr) { cx.spawn(async () => { await copyText(pr.url); }); this.note = { text: `Copied ${pr.url}`, bad: false }; } break;
+      case "n": this.newPr(cx); break;
       case "r": this.refresh(cx); break;
-      case "escape": run("pane.go", { direction: "left" }); break;
+      case "escape": this.note = null; run("pane.go", { direction: "left" }); break;
     }
     cx.notify();
   }
@@ -107,6 +127,28 @@ export default class Prs extends View {
     });
   }
 
+  // Check out the PR's branch in this folder (gh handles forks and tracking).
+  checkout(pr, cx) {
+    if (this.busy) return;
+    const { cwd, on } = location();
+    this.busy = true; this.note = { text: `Checkout #${pr.number}…`, bad: false };
+    cx.spawn(async (cx) => {
+      try {
+        const r = await exec("gh", ["pr", "checkout", String(pr.number)], { cwd, on, timeout: 60000 });
+        const out = (r.stderr || r.stdout).trim().split("\n").filter(Boolean).slice(-1)[0];
+        this.note = r.code === 0 ? { text: `Checked out ${pr.headRefName} ✓`, bad: false } : { text: out || "Checkout failed", bad: true };
+      } catch (e) { this.note = { text: String(e), bad: true }; }
+      finally { this.busy = false; this.refreshBranch(cx); cx.notify(); }
+    });
+    cx.notify();
+  }
+
+  // Open GitHub's new-PR page for the checked-out branch.
+  newPr(cx) {
+    const { cwd, on } = location();
+    cx.spawn(async () => { await exec("gh", ["pr", "create", "--web"], { cwd, on }).catch(() => {}); });
+  }
+
   open(pr, cx) {
     const { cwd, on } = location();
     cx.spawn(async () => { await exec("gh", ["pr", "view", String(pr.number), "--web"], { cwd, on }).catch(() => {}); });
@@ -124,7 +166,7 @@ export default class Prs extends View {
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Pull requests"))
         .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(String(this.prs.length)))
-        .child(div().flex_1().min_w(0).truncate().text_size(11).text_color(t.dim).text_right().child(this.repo))
+        .child(div().flex_1().min_w(0).truncate().text_size(11).text_color(t.dim).text_right().child(has ? "enter open · c checkout · y copy · ? keys" : this.repo))
         .child(div().id("prs-refresh").px(6).rounded(5).cursor_pointer().text_color(t.muted).hover((s) => s.bg(t.hover)).child(this.loading ? "…" : "↻").on_click((_e, cx) => { this.refresh(cx); })))
       .child(v_flex().id("prs-list").flex_1().min_h(0).overflow_y_scroll().p(6).gap(2)
         .children(this.prs.map((pr, i) => {
@@ -148,6 +190,7 @@ export default class Prs extends View {
               .when(review === "REVIEW_REQUIRED", (e) => e.child(div().text_color(t.blocked).child("review needed"))));
         }))
         .when(!this.prs.length, (e) => e.child(div().p(8).text_color(t.dim).child(this.error || (this.loading ? "Loading pull requests…" : "No open pull requests")))))
+      .when(Boolean(this.note), (e) => e.child(div().flex_none().px(14).py(6).border_t(1).border_color(t.border).truncate().text_size(11).text_color(this.note.bad ? t.ansi1 : t.dim).child(this.note.text)))
       .when(this.help, (e) => e.child(helpCard(t, "Pull requests", HELP)));
   }
 }
