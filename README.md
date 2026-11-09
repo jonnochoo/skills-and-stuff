@@ -21,6 +21,8 @@ Installs my standard app list via winget (see [setup/apps](setup/apps/README.md)
   Run: `.\setup\wezterm\setup-wezterm.ps1`
 - [setup/nvim](setup/nvim/README.md) — LazyVim starter setup steps + the one real customization
   (config itself isn't vendored, it's stock LazyVim).
+- [setup/kanata](setup/kanata/README.md) — keyboard remaps (Caps Lock as a navigation/media "fn"
+  layer). Run: `.\setup\kanata\setup-kanata.ps1`
 - [setup/espanso](setup/espanso/README.md) — emoji text-expansion matches (`:world` → 🌍,
   `:shopping` → 🛒). Run: `.\setup\espanso\setup-espanso.ps1`
 
