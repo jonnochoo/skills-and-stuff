@@ -7,7 +7,7 @@ import { spaces, panes, focused, exec, run, nextCommand, setShared, theme, windo
 //   d delete (local; a remote branch asks before deleting on the server) · D force delete
 //   M merge selected into current · R rename · f fast-forward from upstream
 //   r rebase current onto selected · u set upstream to origin/<name> · o open PR on GitHub
-//   F fetch --all --prune · y copy name · esc leave the panel
+//   F fetch --all --prune · p pull current · P push current · y copy name · esc leave the panel
 const ROW = 46, SEP = "\x1f";
 
 function location() {
@@ -24,7 +24,7 @@ const ago = (ts) => {
 
 // Cross-platform clipboard: pbcopy on macOS, PowerShell on Windows, wl-copy/xclip on Linux.
 async function copyText(text) {
-  const q = "'" + text.replace(/'/g, "'\''") + "'";
+  const q = "'" + text.replace(/'/g, "'\\''") + "'";
   const p = window().platform;
   if (p === "windows") return exec("powershell", ["-NoProfile", "-Command", `Set-Clipboard -Value '${text.replace(/'/g, "''")}'`]);
   if (p === "macos") return exec("sh", ["-c", `printf %s ${q} | pbcopy`]);
@@ -60,20 +60,20 @@ export default class Branches extends View {
         const g = (args) => exec("git", ["--no-optional-locks", ...args], { cwd, on });
         const has = async (name) => (await g(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`])).code === 0;
         const base = (await has("main")) ? "main" : (await has("master")) ? "master" : null;
-        const fmt = ["%(HEAD)", "%(refname:short)", "%(refname)", "%(committerdate:unix)", "%(subject)", "%(upstream:track)", ...(base ? [`%(ahead-behind:${base})`] : [])].join(SEP);
+        const fmt = ["%(HEAD)", "%(refname:short)", "%(refname)", "%(committerdate:unix)", "%(subject)", "%(upstream:track)", "%(upstream)", ...(base ? [`%(ahead-behind:${base})`] : [])].join(SEP);
         const r = await exec("git", ["--no-optional-locks", "for-each-ref", "--sort=-committerdate", `--format=${fmt}`, "refs/heads"], { cwd, on });
         if (key() !== context) return;
         if (r.code !== 0) { this.branches = []; this.error = "Not a git repository"; return; }
         const seen = new Set(), list = [];
         for (const line of r.stdout.split("\n").filter(Boolean)) {
-          const [head, name, ref, ts, subject, track, divergence] = line.split(SEP);
+          const [head, name, ref, ts, subject, track, upstream, divergence] = line.split(SEP);
           if (ref.endsWith("/HEAD")) continue;
           const remote = ref.startsWith("refs/remotes/");
           // A remote branch that already has a local one is noise.
           if (remote) { if (seen.has(name.replace(/^[^/]+\//, ""))) continue; }
           else seen.add(name);
           const [ahead, behind] = (divergence ?? "").split(" ").map(Number);
-          list.push({ current: head === "*", name, remote, ts: Number(ts), subject, track, base: name === base, ahead: ahead || 0, behind: behind || 0, stat: null });
+          list.push({ current: head === "*", name, remote, ts: Number(ts), subject, track, upstream, base: name === base, ahead: ahead || 0, behind: behind || 0, stat: null });
         }
         // Lines and files changed since the branch left main, for the ones that have commits of their own.
         await Promise.all(list.filter((b) => base && !b.base && b.ahead > 0).slice(0, 25).map(async (b) => {
@@ -94,6 +94,8 @@ export default class Branches extends View {
           }
         } catch { /* no PR info */ }
         if (key() !== context) return;
+        // The checked-out branch always leads the list; the rest stay newest first.
+        list.sort((a, b) => Number(b.current) - Number(a.current));
         this.base = base; this.branches = list; this.error = null;
         // The selection follows the branch, not the row, so a reorder doesn't move it.
         const at = list.findIndex((b) => b.name === this.selName);
@@ -181,7 +183,7 @@ export default class Branches extends View {
     }
     if (e.modifiers.control || e.modifiers.alt || e.modifiers.platform) return;
     const b = this.current, k = e.modifiers.shift && e.key.length === 1 ? e.key.toUpperCase() : e.key;
-    const known = "j k g G R n d D M r f u F o y".split(" ").concat(["down", "up", "home", "end", "space", "enter", "escape"]);
+    const known = "j k g G R n d D M r f u F o y p P".split(" ").concat(["down", "up", "home", "end", "space", "enter", "escape"]);
     if (!known.includes(k)) return;
     cx.stop_propagation();
     switch (k) {
@@ -211,6 +213,14 @@ export default class Branches extends View {
         else if (b && !b.remote) this.act(`Fast-forward ${b.name}`, ["fetch", ".", `origin/${b.name}:${b.name}`], cx);
         break;
       case "u": if (b && !b.remote) this.act(`Track origin/${b.name}`, ["branch", `--set-upstream-to=origin/${b.name}`, b.name], cx); break;
+      case "p": case "P": {
+        // Pull and push always act on the checked-out branch, not the selected row.
+        const cur = this.branches.find((x) => x.current);
+        if (!cur) { this.note = { text: "No branch checked out", bad: true }; break; }
+        if (k === "p") this.act(`Pull ${cur.name}`, ["pull"], cx);
+        else this.act(`Push ${cur.name}`, cur.upstream ? ["push"] : ["push", "--set-upstream", "origin", cur.name], cx);
+        break;
+      }
       case "F": this.act("Fetch", ["fetch", "--all", "--prune"], cx); break;
       case "o": {
         if (!b) break;
@@ -243,7 +253,7 @@ export default class Branches extends View {
         .child(div().font_semibold().child("Branches"))
         .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(String(this.branches.length)))
         .child(div().flex_1())
-        .child(div().text_size(10).text_color(t.dim).truncate().child(has ? "space checkout · n new · d delete · M merge" : "click to focus")))
+        .child(div().text_size(10).text_color(t.dim).truncate().child(has ? "space checkout · n new · p pull · P push · d delete" : "click to focus")))
       .child(div().id("branches-body").flex_1().min_h(0).relative().overflow_hidden()
         .on_size_change((size, cx) => { if (size.height !== this.height) { this.height = size.height; cx.notify(); } })
         .on_scroll_wheel((e, cx) => {
