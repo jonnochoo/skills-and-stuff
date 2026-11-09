@@ -27,6 +27,24 @@ function ago(iso) {
   return `${Math.round(s / 86400)}d`;
 }
 
+
+// The "?" overlay: this panel's keys. Any key closes it.
+function helpCard(t, title, rows) {
+  return v_flex().id("help-card").absolute().inset_0().bg(t.background).p(16).gap(6).overflow_hidden()
+    .child(h_flex().items_center().child(div().flex_1().font_semibold().child(`${title} keys`)).child(div().text_size(11).text_color(t.dim).child("any key closes")))
+    .children(rows.map(([k, d]) => h_flex().gap(12).text_size(12)
+      .child(div().w(64).flex_none().text_color(t.accent).child(k))
+      .child(div().flex_1().min_w(0).text_color(t.foreground).child(d))));
+}
+const isHelpKey = (e) => e.key === "?" || (e.key === "/" && e.modifiers.shift);
+const HELP = [
+  ["j / k", "move down / up (also arrows)"],
+  ["enter", "open the PR in the browser"],
+  ["r", "refresh the list"],
+  ["esc", "leave the panel"],
+  ["?", "this help"],
+];
+
 export default class Prs extends View {
   init(_props, cx) {
     this.prs = []; this.repo = ""; this.error = null; this.context = null; this.sel = 0; this.branch = "";
@@ -41,7 +59,9 @@ export default class Prs extends View {
   }
 
   onKey(e, cx) {
+    if (this.help) { cx.stop_propagation(); this.help = false; cx.notify(); return; }
     if (e.modifiers.control || e.modifiers.alt || e.modifiers.platform) return;
+    if (isHelpKey(e)) { cx.stop_propagation(); this.help = true; cx.notify(); return; }
     const known = ["j", "k", "down", "up", "enter", "r", "escape"];
     if (!known.includes(e.key)) return;
     cx.stop_propagation();
@@ -99,7 +119,7 @@ export default class Prs extends View {
     if (has !== this.was) { this.was = has; setShared("panel.prs", has); }
     this.sel = Math.max(0, Math.min(this.sel, this.prs.length - 1));
     const color = { pass: t.ansi2, fail: t.ansi1, pending: t.blocked, none: t.dim };
-    return v_flex().id("prs").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(has ? t.accent : t.border).text_color(t.foreground).text_size(13)
+    return v_flex().id("prs").size_full().min_h(0).relative().rounded(10).overflow_hidden().bg(t.background).border_1().border_color(has ? t.accent : t.border).text_color(t.foreground).text_size(13)
       .track_focus(this.handle).on_key_down((e, cx) => this.onKey(e, cx))
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Pull requests"))
@@ -127,6 +147,7 @@ export default class Prs extends View {
               .when(review === "CHANGES_REQUESTED", (e) => e.child(div().text_color(t.ansi1).child("changes requested")))
               .when(review === "REVIEW_REQUIRED", (e) => e.child(div().text_color(t.blocked).child("review needed"))));
         }))
-        .when(!this.prs.length, (e) => e.child(div().p(8).text_color(t.dim).child(this.error || (this.loading ? "Loading pull requests…" : "No open pull requests")))));
+        .when(!this.prs.length, (e) => e.child(div().p(8).text_color(t.dim).child(this.error || (this.loading ? "Loading pull requests…" : "No open pull requests")))))
+      .when(this.help, (e) => e.child(helpCard(t, "Pull requests", HELP)));
   }
 }

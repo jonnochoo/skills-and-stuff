@@ -31,6 +31,36 @@ async function copyText(text) {
   return exec("sh", ["-c", `printf %s ${q} | (wl-copy || xclip -selection clipboard)`]);
 }
 
+
+// The "?" overlay: this panel's keys. Any key closes it.
+function helpCard(t, title, rows) {
+  return v_flex().id("help-card").absolute().inset_0().bg(t.background).p(16).gap(6).overflow_hidden()
+    .child(h_flex().items_center().child(div().flex_1().font_semibold().child(`${title} keys`)).child(div().text_size(11).text_color(t.dim).child("any key closes")))
+    .children(rows.map(([k, d]) => h_flex().gap(12).text_size(12)
+      .child(div().w(64).flex_none().text_color(t.accent).child(k))
+      .child(div().flex_1().min_w(0).text_color(t.foreground).child(d))));
+}
+const isHelpKey = (e) => e.key === "?" || (e.key === "/" && e.modifiers.shift);
+const HELP = [
+  ["j / k", "move down / up (also arrows)"],
+  ["g / G", "jump to top / bottom"],
+  ["space", "checkout the selected branch (enter too)"],
+  ["n", "new branch from the selected one"],
+  ["p", "pull the checked-out branch"],
+  ["P", "push the checked-out branch (sets upstream if needed)"],
+  ["f", "fast-forward from upstream"],
+  ["F", "fetch --all --prune"],
+  ["d / D", "delete / force delete (asks first)"],
+  ["M", "merge selected into current"],
+  ["r", "rebase current onto selected"],
+  ["R", "rename"],
+  ["u", "set upstream to origin/<name>"],
+  ["o", "open the PR on GitHub (or start one)"],
+  ["y", "copy branch name"],
+  ["esc", "leave the panel"],
+  ["?", "this help"],
+];
+
 export default class Branches extends View {
   init(_props, cx) {
     this.branches = []; this.error = null; this.context = null; this.sel = 0; this.selName = null;
@@ -181,7 +211,9 @@ export default class Branches extends View {
       cx.notify();
       return;
     }
+    if (this.help) { cx.stop_propagation(); this.help = false; cx.notify(); return; }
     if (e.modifiers.control || e.modifiers.alt || e.modifiers.platform) return;
+    if (isHelpKey(e)) { cx.stop_propagation(); this.help = true; cx.notify(); return; }
     const b = this.current, k = e.modifiers.shift && e.key.length === 1 ? e.key.toUpperCase() : e.key;
     const known = "j k g G R n d D M r f u F o y p P".split(" ").concat(["down", "up", "home", "end", "space", "enter", "escape"]);
     if (!known.includes(k)) return;
@@ -247,13 +279,13 @@ export default class Branches extends View {
     const t = theme(), has = this.handle.is_focused(), m = this.mode;
     // Tells the Ctrl+Tab cycler (pane-cycle) which panel holds the keyboard.
     if (has !== this.was) { this.was = has; setShared("panel.branches", has); }
-    return v_flex().id("branches").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(has ? t.accent : t.border).text_color(t.foreground).text_size(13)
+    return v_flex().id("branches").size_full().min_h(0).relative().rounded(10).overflow_hidden().bg(t.background).border_1().border_color(has ? t.accent : t.border).text_color(t.foreground).text_size(13)
       .track_focus(this.handle).on_key_down((e, cx) => this.onKey(e, cx))
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Branches"))
         .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(String(this.branches.length)))
         .child(div().flex_1())
-        .child(div().text_size(10).text_color(t.dim).truncate().child(has ? "space checkout · n new · p pull · P push · d delete" : "click to focus")))
+        .child(div().text_size(10).text_color(t.dim).truncate().child(has ? "space checkout · p pull · P push · ? keys" : "click to focus")))
       .child(div().id("branches-body").flex_1().min_h(0).relative().overflow_hidden()
         .on_size_change((size, cx) => { if (size.height !== this.height) { this.height = size.height; cx.notify(); } })
         .on_scroll_wheel((e, cx) => {
@@ -289,6 +321,7 @@ export default class Branches extends View {
       .when(m?.kind === "input", (e) => e.child(v_flex().flex_none().p(10).gap(4).border_t(1).border_color(t.border)
         .child(div().text_size(11).text_color(t.dim).child(m.label))
         .child(div().id("branch-input").h(30).px(10).flex().items_center().rounded(8).border_1().border_color(t.accent).on_mouse_down("left", (_e, cx) => cx.stop_propagation()).child(Input.new(this.input).h_full().text_size(12).text_color(t.foreground)))))
-      .when(Boolean(this.note) && !m, (e) => e.child(div().flex_none().px(14).py(6).border_t(1).border_color(t.border).truncate().text_size(11).text_color(this.note.bad ? t.ansi1 : t.dim).child(this.note.text)));
+      .when(Boolean(this.note) && !m, (e) => e.child(div().flex_none().px(14).py(6).border_t(1).border_color(t.border).truncate().text_size(11).text_color(this.note.bad ? t.ansi1 : t.dim).child(this.note.text)))
+      .when(this.help, (e) => e.child(helpCard(t, "Branches", HELP)));
   }
 }

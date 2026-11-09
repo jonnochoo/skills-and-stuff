@@ -34,6 +34,29 @@ function diffRows(lines) {
   });
 }
 
+
+// The "?" overlay: this panel's keys. Any key closes it.
+function helpCard(t, title, rows) {
+  return v_flex().id("help-card").absolute().inset_0().bg(t.background).p(16).gap(6).overflow_hidden()
+    .child(h_flex().items_center().child(div().flex_1().font_semibold().child(`${title} keys`)).child(div().text_size(11).text_color(t.dim).child("any key closes")))
+    .children(rows.map(([k, d]) => h_flex().gap(12).text_size(12)
+      .child(div().w(64).flex_none().text_color(t.accent).child(k))
+      .child(div().flex_1().min_w(0).text_color(t.foreground).child(d))));
+}
+const isHelpKey = (e) => e.key === "?" || (e.key === "/" && e.modifiers.shift);
+const HELP = [
+  ["j / k", "move down / up (also arrows)"],
+  ["space", "stage / unstage the file"],
+  ["a", "stage all (unstage all when nothing is left)"],
+  ["c", "write a commit message (enter commits)"],
+  ["A", "amend the last commit with what is staged"],
+  ["d", "discard the file's changes (asks first)"],
+  ["p", "pull --ff-only"],
+  ["P", "push the current branch (asks first)"],
+  ["esc", "leave the panel"],
+  ["?", "this help"],
+];
+
 export default class Changes extends View {
   init(_props, cx) {
     this.files = []; this.rows = []; this.diffWidth = 0; this.message = ""; this.handle = cx.focus_handle();
@@ -237,7 +260,9 @@ export default class Changes extends View {
       cx.notify();
       return;
     }
+    if (this.help) { cx.stop_propagation(); this.help = false; cx.notify(); return; }
     if (e.modifiers.control || e.modifiers.alt || e.modifiers.platform) return;
+    if (isHelpKey(e)) { cx.stop_propagation(); this.help = true; cx.notify(); return; }
     const k = e.modifiers.shift && e.key.length === 1 ? e.key.toUpperCase() : e.key;
     const known = ["j", "k", "down", "up", "space", "a", "c", "A", "d", "P", "p", "escape"];
     if (!known.includes(k)) return;
@@ -272,12 +297,12 @@ export default class Changes extends View {
     if (has !== this.was) { this.was = has; setShared("panel.changes", has); }
     const add = this.files.reduce((n, f) => n + f.add, 0), del = this.files.reduce((n, f) => n + f.del, 0), staged = this.files.filter((f) => f.staged).length;
     const enabled = Boolean(this.message.trim() && this.root && !this.busy && !this.loading && staged > 0);
-    return v_flex().id("changes").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.background).border_1().border_color(has || this.typing ? t.accent : t.border).text_color(t.foreground).text_size(13).track_focus(this.handle)
+    return v_flex().id("changes").size_full().min_h(0).relative().rounded(10).overflow_hidden().bg(t.background).border_1().border_color(has || this.typing ? t.accent : t.border).text_color(t.foreground).text_size(13).track_focus(this.handle)
       .on_key_down((e, cx) => this.onKey(e, cx))
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .child(div().font_semibold().child("Changes"))
         .child(div().px(5).py(1).rounded(4).border_1().border_color(t.border).text_size(10).text_color(t.muted).child(`${this.files.length} files · ${staged} staged`))
-        .child(div().flex_1().min_w(0).truncate().text_size(10).text_color(t.dim).text_right().child(has ? "space stage · a all · c commit · d discard · P push" : "click to focus"))
+        .child(div().flex_1().min_w(0).truncate().text_size(10).text_color(t.dim).text_right().child(has ? "space stage · a all · c commit · P push · ? keys" : "click to focus"))
         .child(div().text_size(11).text_color(t.ansi2).child(`+${add}`)).child(div().text_size(11).text_color(t.ansi1).child(`−${del}`)))
       // overflow_y_scrollbar() wraps the list, so its flex sizing never reached the panel's layout.
       .child(div().flex_1().min_h(44).max_h(this.files.length * 28 + 12).relative().border_b(1).border_color(t.border)
@@ -304,6 +329,7 @@ export default class Changes extends View {
       .when(Boolean(this.note) && !m, (e) => e.child(div().flex_none().px(14).py(6).border_t(1).border_color(t.border).truncate().text_size(11).text_color(this.note.bad ? t.ansi1 : t.dim).child(this.note.text)))
       .child(h_flex().flex_none().p(10).gap(8).border_t(1).border_color(t.border)
         .child(div().id("commit-message").flex_1().min_w(0).h(32).px(10).flex().items_center().rounded(8).border_1().border_color(this.typing ? t.accent : t.border).cursor_text().on_mouse_down("left", (_e, cx) => cx.stop_propagation()).child(Input.new(this.input).h_full().text_size(12).text_color(t.foreground)))
-        .child(div().id("commit").h(32).px(14).flex().items_center().rounded(8).bg(enabled ? t.solid : t.raised).text_color(enabled ? t.solid_foreground : t.dim).text_size(12).when(enabled, (e) => e.cursor_pointer()).on_click((_e, cx) => this.commit(cx)).child(this.busy ? "Working…" : "Commit")));
+        .child(div().id("commit").h(32).px(14).flex().items_center().rounded(8).bg(enabled ? t.solid : t.raised).text_color(enabled ? t.solid_foreground : t.dim).text_size(12).when(enabled, (e) => e.cursor_pointer()).on_click((_e, cx) => this.commit(cx)).child(this.busy ? "Working…" : "Commit")))
+      .when(this.help, (e) => e.child(helpCard(t, "Changes", HELP)));
   }
 }
