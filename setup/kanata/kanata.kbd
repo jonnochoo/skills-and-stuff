@@ -1,0 +1,74 @@
+;; Kanata config (Windows)
+;; Caps Lock never toggles casing. Tap -> nothing | Hold -> "fn" layer
+;; While Caps is held, only the keys bound in "fn" do anything.
+;; Modifiers (Shift, Ctrl, Alt, Win) still work so combos aren't broken.
+
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+  ins  del  home end  pgup pgdn
+  up   left down right
+)
+
+(defvirtualkeys
+  ;; Alt that stays held while you're in the Caps layer (for Alt+Tab cycling)
+  vk-alt lalt
+)
+
+(defalias
+  ;; Hold Caps -> fn layer. On releasing Caps, also let go of the held Alt,
+  ;; which confirms the Alt+Tab window switch.
+  cap (tap-hold-press 200 200 XX
+        (multi (layer-while-held fn) (on-release release-vkey vk-alt)))
+
+  ;; Caps + ' : press Alt (and keep it held), then tap Tab
+  atab (multi (on-press press-vkey vk-alt) tab)
+
+  ;; Win+Shift+Left/Right (move window to the other monitor)
+  ml  M-S-left
+  mr  M-S-right
+
+  ;; Word jump (add S to select by word)
+  wb  C-left
+  wf  C-right
+)
+
+;; Normal typing: every key is itself, except Caps and Left Alt (now Ctrl)
+(deflayer base
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  @cap _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    lctl           _              _    _    _   ;; Left Alt -> Ctrl
+  _    _    _    _    _    _
+  _    _    _    _
+)
+
+;; Caps held: XX = does nothing
+;;   W / B      word forward / back      U / D   Page Up / Page Down
+;;   H / L      Home / End               J / K   Down / Up
+;;   S          Shift (select)           Enter   next song
+;;   M / N      mute / play-pause        , / .   volume down / up
+;;   Left/Right move window to other monitor
+;;   Z X C V    undo / cut / copy / paste
+;;   '          Alt+Tab (tap again to cycle, add S to go back,
+;;              release Caps to switch)
+(deflayer fn
+  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
+  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
+  XX   XX   @wf  XX   XX   XX   XX   pgup XX   XX   XX   XX   XX   XX
+  _    XX   lsft pgdn XX   XX   home down up   end  XX   @atab next
+  _    C-z  C-x  C-c  C-v  @wb  pp   mute vold volu XX   _
+  _    _    _              XX             _    _    _
+  XX   XX   XX   XX   XX   XX
+  XX   @ml  XX   @mr
+)
