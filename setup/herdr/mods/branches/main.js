@@ -56,7 +56,6 @@ const HELP = [
   ["R", "rename"],
   ["u", "set upstream to origin/<name>"],
   ["⇡ ⇣", "vs its remote branch: ⇡ commits to push, ⇣ to pull, ✓ in sync"],
-  ["↑ ↓", "vs main/master: commits ahead (green) / behind (red)"],
   ["o", "open the PR on GitHub (or start one)"],
   ["y", "copy branch name"],
   ["esc", "leave the panel"],
@@ -316,9 +315,7 @@ export default class Branches extends View {
                   const color = gone ? t.ansi1 : diverged ? t.blocked : t.dim;
                   return e.child(div().px(4).rounded(3).border_1().border_color(color).text_size(10).text_color(color).child(text));
                 })
-                // Against main: commits ahead (green) and behind (red), then a bar of added vs removed lines.
-                .when(b.ahead > 0, (e) => e.child(div().text_size(10).text_color(t.ansi2).child(`↑${b.ahead}`)))
-                .when(b.behind > 0, (e) => e.child(div().text_size(10).text_color(t.ansi1).child(`↓${b.behind}`)))
+                // A bar of lines added vs removed since the branch left main.
                 .when(Boolean(b.stat) && b.stat.add + b.stat.del > 0, (e) => {
                   const total = b.stat.add + b.stat.del, width = Math.round(12 + 36 * Math.min(1, Math.log10(total + 1) / 3)), green = Math.max(2, Math.round(width * b.stat.add / total));
                   return e.child(h_flex().w(width).h(6).flex_none().rounded(3).overflow_hidden().child(div().w(green).h_full().bg(t.ansi2)).child(div().flex_1().h_full().bg(t.ansi1)));
