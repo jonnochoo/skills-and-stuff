@@ -18,19 +18,9 @@
   up   left down right
 )
 
-(defvirtualkeys
-  ;; Alt that stays held while you're in the Caps layer (for Alt+Tab cycling)
-  vk-alt lalt
-)
-
 (defalias
-  ;; Hold Caps -> fn layer. On releasing Caps, also let go of the held Alt,
-  ;; which confirms the Alt+Tab window switch.
-  cap (tap-hold-press 200 200 XX
-        (multi (layer-while-held fn) (on-release release-vkey vk-alt)))
-
-  ;; Caps + ' : press Alt (and keep it held), then tap Tab
-  atab (multi (on-press press-vkey vk-alt) tab)
+  ;; Hold Caps -> fn layer. Tap does nothing.
+  cap (tap-hold-press 200 200 XX (layer-while-held fn))
 
   ;; Win+Shift+Left/Right (move window to the other monitor)
   ml  M-S-left
@@ -55,20 +45,20 @@
 
 ;; Caps held: XX = does nothing
 ;;   W / B      word forward / back      U / D   Page Up / Page Down
-;;   E          Ctrl+T (new tab)         [ / ]   previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)
+;;   Q          Ctrl+W (close tab)       A       Ctrl+Shift+A (tab search)
+;;   E          Ctrl+T (new tab)        I / O   previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)
 ;;   H or G     Home                     L or ;  End
+;;   P          Ctrl+Shift+P (command palette)
 ;;   J / K     Down / Up
 ;;   S          Shift (select)           Enter   next song
 ;;   M / N      mute / play-pause        , / .   volume down / up
 ;;   Left/Right move window to other monitor
 ;;   Z X C V    undo / cut / copy / paste
-;;   I / O / '  Alt+Tab (tap again to cycle, add S to go back,
-;;              release Caps to switch)
 (deflayer fn
   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
-  XX   XX   @wf  C-t  XX   XX   XX   pgup @atab @atab XX C-S-tab C-tab XX
-  _    XX   lsft pgdn XX   home home down up   end  end  @atab next
+  XX   C-w  @wf  C-t XX   XX   XX   pgup C-S-tab C-tab C-S-p XX   XX   XX
+  _    C-S-a lsft pgdn XX   home home down up   end  end  XX   next
   _    C-z  C-x  C-c  C-v  @wb  pp   mute vold volu XX   _
   _    _    _              XX             _    _    _
   XX   XX   XX   XX   XX   XX
