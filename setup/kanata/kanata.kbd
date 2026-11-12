@@ -41,32 +41,34 @@
   wf  C-right
 )
 
-;; Normal typing: every key is itself, except Caps and Left Alt (now Ctrl)
+;; Normal typing: every key is itself, except Caps
 (deflayer base
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   @cap _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    lctl           _              _    _    _   ;; Left Alt -> Ctrl
+  _    _    lctl           _              _    _    _
   _    _    _    _    _    _
   _    _    _    _
 )
 
 ;; Caps held: XX = does nothing
 ;;   W / B      word forward / back      U / D   Page Up / Page Down
-;;   H / L      Home / End               J / K   Down / Up
+;;   E          Ctrl+T (new tab)         [ / ]   previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)
+;;   H or G     Home                     L or ;  End
+;;   J / K     Down / Up
 ;;   S          Shift (select)           Enter   next song
 ;;   M / N      mute / play-pause        , / .   volume down / up
 ;;   Left/Right move window to other monitor
 ;;   Z X C V    undo / cut / copy / paste
-;;   '          Alt+Tab (tap again to cycle, add S to go back,
+;;   I / O / '  Alt+Tab (tap again to cycle, add S to go back,
 ;;              release Caps to switch)
 (deflayer fn
   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
-  XX   XX   @wf  XX   XX   XX   XX   pgup XX   XX   XX   XX   XX   XX
-  _    XX   lsft pgdn XX   XX   home down up   end  XX   @atab next
+  XX   XX   @wf  C-t  XX   XX   XX   pgup @atab @atab XX C-S-tab C-tab XX
+  _    XX   lsft pgdn XX   home home down up   end  end  @atab next
   _    C-z  C-x  C-c  C-v  @wb  pp   mute vold volu XX   _
   _    _    _              XX             _    _    _
   XX   XX   XX   XX   XX   XX
