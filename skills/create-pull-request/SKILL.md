@@ -65,7 +65,28 @@ Why this change exists. 1-3 sentences.
 
 ## What Changed
 
-Table, not a bullet list — plain English, for a reviewer who isn't in the code. Two columns: `Change` (the concrete technical change — endpoint, flag, function) and `What it means` (what actually happens as a result, in plain language, no jargon). One row per distinct change; group related changes into one row if they share the same effect. If the diff is large, a `### <area>` sub-heading per group is fine, each with its own table.
+Three sub-sections, in this order. Omit any sub-section with nothing in it. Within each, use the table: plain English, for a reviewer who isn't in the code. Two columns: `Change` (the concrete technical change: endpoint, flag, function) and `What it means` (what actually happens as a result, in plain language, no jargon). One row per distinct change; group related changes into one row if they share the same effect. If the diff is large, a `#### <area>` sub-heading per group is fine, each with its own table.
+
+### New
+
+Code that didn't exist before: files, modules, endpoints, components.
+
+- **New pattern:** if the PR adds an abstraction others are expected to copy (a hook, helper, module or convention that future code should follow), start the row's `Change` cell with a bold `New pattern:`. In `What it means`, say in one line why it is the way to do it now.
+- Don't flag one-off code, or things that just follow an existing pattern.
+
+### Refactor
+
+Existing code that was meaningfully restructured. Count it when any of these hold:
+
+- **Restructured, behaviour preserved:** code moved, split, merged or re-layered (e.g. `useEffect` loading → `useQuery`).
+- **Mechanism deleted:** a whole pattern or module removed and replaced. Write the `Change` cell as `X → replaced by Y`.
+- **Interface changed:** props, function signatures or exports changed, even if behaviour is the same. Name what changed.
+
+Never list renames, formatting, import reordering or code that only moved files. State the old way and the new way. If behaviour changed too, say so here and in Risks.
+
+### New Packages
+
+Each dependency added, one row per package: `name@version` (runtime or dev) in `Change`, and what it is used for in `What it means`. Use the version from the lockfile, not the range. Omit if the dependencies didn't change. Mention removed or bumped packages here too.
 
 ## Risks
 
@@ -86,6 +107,14 @@ Checklist the reviewer/tester can actually run through:
 - [ ] Step two
       ...
 ```
+
+## Diff links
+
+Link to the file-changes diff only where it warrants a look: risky or hard-to-skim spots such as migrations, auth, signing, config, or a large rewrite. Skip it for routine changes; most PRs need none.
+
+- Link the specific file (or range), not the whole Files tab: `https://github.com/<owner>/<repo>/pull/<N>/files#diff-<sha256 of the file path>` (the anchor is the SHA-256 hex of the path as shown in the diff). Add `R<line>` or `R<start>-R<end>` after it to point at lines on the new side.
+- The PR number isn't known until it's created, so create the PR first, then add the links with `gh pr edit`.
+- Put each link in the section it belongs to, next to the row or bullet it supports (usually Risks or a Refactor row), with a few words on what to look at.
 
 ## Hard rules
 
