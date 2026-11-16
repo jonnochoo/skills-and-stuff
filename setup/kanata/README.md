@@ -26,12 +26,14 @@ Edit [kanata.kbd](kanata.kbd) and re-run the setup script to sync. Kanata can ho
 | Caps + | Action                                                        |
 | ------ | ------------------------------------------------------------- |
 | `W` / `B` | Word forward / back (add `S` to select)                    |
-| `H` / `L` | Home / End                                                 |
-| `J` / `K` | Down / Up                                                  |
+| `G` / `;` | Home / End                                                 |
+| `H` `J` `K` `L` | Left / Down / Up / Right (vim style)                 |
 | `U` / `D` | Page Up / Page Down                                        |
 | `S`    | Shift (for selecting)                                         |
 | `Z` `X` `C` `V` | Undo / cut / copy / paste                            |
-| `'`    | Alt+Tab. Tap again to cycle, add `S` to go back, release Caps to switch |
+| `I` / `O` | Previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)            |
+| `Q` / `E` | Close tab (Ctrl+W) / new tab (Ctrl+T)                      |
+| `A` / `P` | Tab search (Ctrl+Shift+A) / command palette (Ctrl+Shift+P) |
 | `←` / `→` | Move window to the other monitor (Win+Shift+Arrow)         |
 | `,` / `.` | Volume down / up                                           |
 | `M` / `N` | Mute / play-pause                                          |

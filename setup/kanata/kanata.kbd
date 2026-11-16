@@ -47,9 +47,9 @@
 ;;   W / B      word forward / back      U / D   Page Up / Page Down
 ;;   Q          Ctrl+W (close tab)       A       Ctrl+Shift+A (tab search)
 ;;   E          Ctrl+T (new tab)        I / O   previous / next tab (Ctrl+Shift+Tab / Ctrl+Tab)
-;;   H or G     Home                     L or ;  End
+;;   G          Home                     ;       End
 ;;   P          Ctrl+Shift+P (command palette)
-;;   J / K     Down / Up
+;;   H J K L    Left / Down / Up / Right (vim style)
 ;;   S          Shift (select)           Enter   next song
 ;;   M / N      mute / play-pause        , / .   volume down / up
 ;;   Left/Right move window to other monitor
@@ -58,7 +58,7 @@
   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
   XX   C-w  @wf  C-t XX   XX   XX   pgup C-S-tab C-tab C-S-p XX   XX   XX
-  _    C-S-a lsft pgdn XX   home home down up   end  end  XX   next
+  _    C-S-a lsft pgdn XX   home left down up   rght end  XX   next
   _    C-z  C-x  C-c  C-v  @wb  pp   mute vold volu XX   _
   _    _    _              XX             _    _    _
   XX   XX   XX   XX   XX   XX
